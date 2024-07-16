@@ -16,7 +16,7 @@ def draw_arrows_on_image(image, angles, magnitudes, step=20):
     """
 
     # grab height and width from original to compute step
-    height, width = image.shape[:2]
+    height, width = image.shape
 
     # copy over original image and convert to bgr
     retVal = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
@@ -33,5 +33,29 @@ def draw_arrows_on_image(image, angles, magnitudes, step=20):
 
                 # draw the arrow                
                 cv2.arrowedLine(retVal, (x, y), (x + dx, y + dy), (0,0,255), 1, tipLength=0.5)
+
+    return retVal
+
+
+def draw_circles_on_image(image, points):
+    """
+    Draw points on an image with a desired radius
+
+    Parameters:
+    image (np.ndarray): The original grayscale image (2D).
+    points (np.ndarray): A 1D array of 2D points.
+    radius (int): The radius, in px, of each point
+
+    Returns:
+    np.ndarray: The original image with circles drawn on it indicating the points.
+    """
+
+    # copy over original image and convert to bgr
+    retVal = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+
+    # iterate points
+    for p in points:
+        # draw the point                
+        cv2.circle(retVal, (p[1], p[0]), 5, (0,0,255), -1)
 
     return retVal
