@@ -28,6 +28,7 @@ def angle_magnitude_to_hsv(angles, magnitudes):
 
     # normalize the magnitudes to the greatest magnitude found in the image
     hsv_image[..., 2] = (magnitudes / (magnitudes.max() + 1e-10) * 255).astype(np.uint8)
+    
     return hsv_image
 
 def displacement_to_angle_and_magnitude(y, x):

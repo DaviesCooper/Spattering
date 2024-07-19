@@ -7,4 +7,4 @@ temp_folder = '/home/zigzalgo/git/Spattering/output'
 
 image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 program.preprocess_image(image, temp_folder)
-program.create_initial_points(image, temp_folder, 1000)
+vor, points = program.create_initial_points(image, temp_folder, 1000)

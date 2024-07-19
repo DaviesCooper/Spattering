@@ -1,8 +1,9 @@
 import cv2
 import os
 import numpy as np
+from scipy.spatial import Voronoi
 from src.preprocessing import generate_magnitude_and_angle_maps, angle_magnitude_to_hsv
-from src.visualizations import draw_arrows_on_image, draw_circles_on_image
+from src.visualizations import draw_arrows_on_image, draw_circles_on_image, draw_voronoi_on_image
 
 
 def preprocess_image(image, temp_folder): 
@@ -18,11 +19,10 @@ def preprocess_image(image, temp_folder):
 
 def create_initial_points(image, temp_folder, num_points):
     height, width = image.shape
-    points = (np.random.rand(num_points, 2) * np.array([height, width])).astype(np.uint16)
+    points = (np.random.rand(num_points, 2) * np.array([height, width])).astype(np.uint16)  
+    vor = Voronoi(points)
     if not (os.path.isdir(temp_folder)):
-        return points
-    
+        return vor, points
     random_points = draw_circles_on_image(image, points)
-    cv2.imwrite(os.path.join(temp_folder, "initial_points.png"), random_points)
-    return points
-    
+    voronoi_diagram = draw_voronoi_on_image(random_points, vor)
+    cv2.imwrite(os.path.join(temp_folder, "voronoi_diagram.png"), voronoi_diagram)

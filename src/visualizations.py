@@ -59,3 +59,41 @@ def draw_circles_on_image(image, points):
         cv2.circle(retVal, (p[1], p[0]), 5, (0,0,255), -1)
 
     return retVal
+
+def draw_voronoi_on_image(image, voronoi):
+    """
+    Draw the voronoi tesselation of some points on an image
+
+    Parameters:
+    image (np.ndarray): The original grayscale image (2D).
+    Voronoi (scipy.spatial.Voronoi) The voronoi tesselation of the points
+
+    Returns:
+    np.ndarray: The original image with the boundaries of the tesselation drawn on it.
+    """
+
+    # aggregate the lines for a single opencv call
+    lines = []
+
+    # skip the last region as it encompasses the entire image
+    for region_idx in range(len(voronoi.regions) - 1):
+        # extract the region
+        region = voronoi.regions[region_idx]
+
+        # skip empty/invalid regions
+        if not region or -1 in region:  # skip empty or invalid regions
+            continue
+        
+        # Have to inver the vertex coordinates because opencv is (cols, rows) while scipy is (row, cols)
+        vertices = [[voronoi.vertices[i][1], voronoi.vertices[i][0]] for i in region]
+
+        # opencv expects this shape as outlined in their documentation
+        vertices = np.array(vertices, np.int32).reshape((-1, 1, 2))
+
+        # append to our list
+        lines.append(vertices)
+
+    # Draw all Voronoi cells in one go
+    cv2.polylines(image, lines, isClosed=True, color=(255, 0, 0), thickness=1)
+
+    return image            
