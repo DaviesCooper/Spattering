@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-def draw_arrows_on_image(image, angles, magnitudes, step=20):
+def draw_arrows_on_image(image, angles, magnitudes, color, step=20):
     """
     Draw arrows on an image based on angle and magnitude data. Used to represent directional vectors on an image
 
@@ -15,15 +15,12 @@ def draw_arrows_on_image(image, angles, magnitudes, step=20):
     np.ndarray: The original image with arrows drawn on it indicating the flow direction and magnitude.
     """
 
-    # grab height and width from original to compute step
-    height, width = image.shape
-
     # copy over original image and convert to bgr
-    retVal = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    retVal = image.copy()
 
     # iterate pixels by step count
-    for y in range(0, height, step):
-        for x in range(0, width, step):
+    for y in range(0, retVal.shape[0], step):
+        for x in range(0, retVal.shape[1], step):
             
             # so long as the magnitude is positive
             if magnitudes[y, x] > 0:          
@@ -32,12 +29,12 @@ def draw_arrows_on_image(image, angles, magnitudes, step=20):
                 dy = int(magnitudes[y, x] * np.sin(np.radians(angles[y, x])))
 
                 # draw the arrow                
-                cv2.arrowedLine(retVal, (x, y), (x + dx, y + dy), (0,0,255), 1, tipLength=0.5)
+                cv2.arrowedLine(retVal, (x, y), (x + dx, y + dy), color, 1, tipLength=0.5)
 
     return retVal
 
 
-def draw_circles_on_image(image, points):
+def draw_circles_on_image(image, points, color):
     """
     Draw points on an image with a desired radius
 
@@ -50,17 +47,16 @@ def draw_circles_on_image(image, points):
     np.ndarray: The original image with circles drawn on it indicating the points.
     """
 
-    # copy over original image and convert to bgr
-    retVal = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-
+    # copy over original image
+    retVal = image.copy()
     # iterate points
     for p in points:
         # draw the point                
-        cv2.circle(retVal, (p[1], p[0]), 5, (0,0,255), -1)
+        cv2.circle(retVal, (p[1], p[0]), 5, color, -1)
 
     return retVal
 
-def draw_voronoi_on_image(image, voronoi):
+def draw_voronoi_on_image(image, voronoi, color):
     """
     Draw the voronoi tesselation of some points on an image
 
@@ -71,7 +67,7 @@ def draw_voronoi_on_image(image, voronoi):
     Returns:
     np.ndarray: The original image with the boundaries of the tesselation drawn on it.
     """
-
+    retVal = image.copy()
     # aggregate the lines for a single opencv call
     lines = []
 
@@ -94,6 +90,6 @@ def draw_voronoi_on_image(image, voronoi):
         lines.append(vertices)
 
     # Draw all Voronoi cells in one go
-    cv2.polylines(image, lines, isClosed=True, color=(255, 0, 0), thickness=1)
+    cv2.polylines(retVal, lines, True, color, 1)
 
-    return image            
+    return retVal            

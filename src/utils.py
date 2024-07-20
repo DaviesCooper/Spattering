@@ -40,3 +40,10 @@ def polygon_centroid(vertices):
     cx /= (6.0 * signed_area)
     cy /= (6.0 * signed_area)
     return np.array([cy, cx])
+
+
+def left_pad(string, length, char):
+    toPad = length - len(string)
+    if(toPad > 0):
+        return str(char)*toPad + string
+    return string
