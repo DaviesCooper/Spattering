@@ -18,25 +18,12 @@ def preprocess_image(image, temp_folder):
     cv2.imwrite(os.path.join(temp_folder, "hsv_plot.png"), hsv_image)
     return angles, magnitudes 
 
-def create_initial_points(image, temp_folder, num_points):
-    height, width = image.shape
-    points = (np.random.rand(num_points, 2) * np.array([height, width])).astype(np.uint16)  
-    vor = Voronoi(points)
-    if not (os.path.isdir(temp_folder)):
-        return vor, points
-    random_points = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-    random_points = draw_circles_on_image(random_points, points, (255,0,0))
-    voronoi_diagram = draw_voronoi_on_image(random_points, vor, (0,255,0))
-    cv2.imwrite(os.path.join(temp_folder, "voronoi_diagram.png"), voronoi_diagram)
-
-    return vor, points
-
-def relax_points(image, angles, magnitudes, temp_folder, voronoi, points, iteration):
-    pre_image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-    pre_image = draw_circles_on_image(pre_image, points, (255, 0, 0))
-
+def relax_points(image, angles, magnitudes, temp_folder, points, iteration):
+    voronoi = Voronoi(points)
     for point_index in range(len(points)):
         y, x = points[point_index]
+        if image[y, x] == 255 or image[y,x] == 0:
+            continue
         region_index = voronoi.point_region[point_index] 
         region = voronoi.regions[region_index]
         if not region or -1 in region:
@@ -52,15 +39,22 @@ def relax_points(image, angles, magnitudes, temp_folder, voronoi, points, iterat
         newx += centroid[1]
         newy += centroid[0]
 
-        newx /= 2
-        newy /= 2
+        newx+=x
+        newy+=y
+
+        newx /= 3
+        newy /= 3
         
         points[point_index] = np.array([np.clip(newy, 0, image.shape[0] - 1), np.clip(newx, 0, image.shape[1] - 1)])
     
-    relaxed_image = draw_circles_on_image(pre_image, points, (0,255,0))
+    if not (os.path.isdir(temp_folder)):
+        return points
     
+    pre_image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    points_image = draw_circles_on_image(pre_image, points, (255,0,0))
+    voronoi_diagram = draw_voronoi_on_image(points_image, voronoi, (0,255,0))
     fileName = left_pad(f"{iteration}", 6, "0")
-    cv2.imwrite(os.path.join(temp_folder, f"relaxed{fileName}.png"), relaxed_image)
+    cv2.imwrite(os.path.join(temp_folder, f"relaxed{fileName}.png"), voronoi_diagram)
     
     return points
 

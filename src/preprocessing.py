@@ -86,7 +86,7 @@ def generate_magnitude_and_angle_maps(image, window_size = 5):
             # if the pixel is fully white, point towards the center
             if smoothed_heightmap[pixel_Y, pixel_X] == 255:
                 # get the angle and magnitude to the center of the image, and set the angle and momentum of the flow chart
-                angle, magnitude = displacement_to_angle_and_magnitude(center_y - pixel_Y, center_x - pixel_X)
+                angle, magnitude = displacement_to_angle_and_magnitude(pixel_Y - center_y, pixel_X - center_x)
                 angles[pixel_Y, pixel_X] = angle
                 magnitudes[pixel_Y, pixel_X] = 10
 

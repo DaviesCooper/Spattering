@@ -52,7 +52,7 @@ def draw_circles_on_image(image, points, color):
     # iterate points
     for p in points:
         # draw the point                
-        cv2.circle(retVal, (p[1], p[0]), 5, color, -1)
+        cv2.circle(retVal, (p[1], p[0]), 2, color, -1)
 
     return retVal
 
