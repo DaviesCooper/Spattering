@@ -44,7 +44,6 @@ def polygon_centroid(vertices):
     cy /= (6.0 * signed_area)
     return np.array([cy, cx])
 
-
 def left_pad(string: str, length: int, char: str):
     """
     Left pads the given string with the specified character to reach the desired length.
@@ -61,7 +60,6 @@ def left_pad(string: str, length: int, char: str):
     if(toPad > 0):
         return str(char)*toPad + string
     return string
-
 
 def images_to_video(image_folder: str, video_name: str):
     """
@@ -108,12 +106,11 @@ def ensure_empty_directory(directory_path):
     """
     # Check if the path exists
     if os.path.exists(directory_path):
-        # If the path exists, delete all contens
+        # If the path exists, delete all contents
         shutil.rmtree(directory_path) 
-    # Otherwise, create the directory             
-    else:
-        os.makedirs(directory_path)
-
+    # then create the directory             
+    os.makedirs(directory_path)
+    
 def draw_arrows_on_image(image: cv2.Mat, angles: np.ndarray, magnitudes: np.ndarray, color: tuple[int, int, int], step:int=20):
     """
     Draw arrows on an image based on angle and magnitude data. Used to represent directional vectors on an image
@@ -146,8 +143,7 @@ def draw_arrows_on_image(image: cv2.Mat, angles: np.ndarray, magnitudes: np.ndar
 
     return retVal
 
-
-def draw_circles_on_image(image: cv2.Mat, points: np.ndarray, color: tuple[int, int, int]):
+def draw_circles_on_image(image: cv2.Mat, points: np.ndarray, color: tuple[int, int, int], radius:int = 2):
     """
     Draw points on an image with a desired radius
 
@@ -165,7 +161,7 @@ def draw_circles_on_image(image: cv2.Mat, points: np.ndarray, color: tuple[int, 
     # iterate points
     for p in points:
         # draw the point                
-        cv2.circle(retVal, (p[1], p[0]), 2, color, -1)
+        cv2.circle(retVal, (p[1], p[0]), radius, color, -1)
 
     return retVal
 
