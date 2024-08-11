@@ -3,6 +3,7 @@ import cv2
 import os
 import datetime
 import numpy as np
+import xml.etree.cElementTree as ET
 from src.utils import ensure_empty_directory, images_to_video
 from src.classes import DebugOptions
 
@@ -76,25 +77,40 @@ class AbstractStippleGenerator(ABC):
         """
         pass
 
-    @abstractmethod
     def exportToSVG(self, outputPath: str):
         """
         Abstract method to export generated stipple patterns to SVG format.
 
         Args:
+            - points (np.array): The points to export to svg
             - outputPath (str): The path where the SVG file will be saved.
         """
-        pass
+        radius = self.pointUnitRadius * self.dpi
+        xml_declaration = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n'
+        postSort = sorted(self.result, key=lambda point: point[0]**2 + point[1]**2)
 
-    @abstractmethod
-    def exportToPNG(self, outputPath: str):
-        """
-        Abstract method to export generated stipple patterns to PNG format.
-
-        Args:
-            - outputPath (str): The path where the PNG file will be saved.
-        """
-        pass
+        root = ET.Element("svg", 
+                          width=f"{self.image.shape[1]}", 
+                          height=f"{self.image.shape[0]}", 
+                          viewbox=f"{0} {0} {self.image.shape[1]} {self.image.shape[0]}",
+                          version="1.1",
+                          id="svg1")
+        layer = ET.SubElement(root, "g", id="layer1")
+        for idx, p in enumerate(postSort):
+            ET.SubElement(layer, "circle", 
+                          style='vector-effect:non-scaling-stroke;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.264583;stroke-dasharray:none;stroke-opacity:1;-inkscape-stroke:hairline',
+                          id=f"Point{idx}",
+                          cx=f"{p[1]}",
+                          cy=f"{p[0]}",
+                          r=f"{radius}"
+                          )
+        
+        with open(outputPath, 'wb') as f:
+            f.write(xml_declaration.encode('utf-8'))  # Write the XML declaration
+            tree = ET.ElementTree(root)
+            tree.write(f, encoding='utf-8', xml_declaration=False)
+        
+        
 
 #endregion
 

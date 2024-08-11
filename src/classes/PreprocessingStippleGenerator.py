@@ -44,12 +44,6 @@ class PreprocessingStippleGenerator(AbstractStippleGenerator):
         points = self._generatePoints()
         relaxed_points = self._relax_points(angles, magnitudes, points)
         self.result = self._postprocess(relaxed_points)
-        
-    def exportToSVG(self, outputPath: str):
-        pass
-
-    def exportToPNG(self, outputPath: str):
-        pass
 #endregion
 
 #region Private Methods
@@ -164,7 +158,7 @@ class PreprocessingStippleGenerator(AbstractStippleGenerator):
                 divisor = 2
 
                 # Adjust the point position using magnitudes and angles if the point is not on a specific value.
-                if self.image[y, x] != 0:
+                if self.image[y, x] > 30:
                     newx += x.astype(np.int32) + int(magnitudes[y, x] * np.cos(np.radians(angles[y, x])))
                     newy += y.astype(np.int32) + int(magnitudes[y, x] * np.sin(np.radians(angles[y, x])))
                     divisor = 3
@@ -175,11 +169,10 @@ class PreprocessingStippleGenerator(AbstractStippleGenerator):
                 retVal[point_index] = np.array([np.clip(newy, 0, self.image.shape[0] - 1), np.clip(newx, 0, self.image.shape[1] - 1)])
             
             # Visualize the Voronoi diagram and updated points for the current iteration.
-            pre_image = cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR)
-            points_image = draw_circles_on_image(pre_image, retVal, (255, 0, 0))
-            voronoi_diagram = draw_voronoi_on_image(points_image, voronoi, (0, 255, 0))
+            blank = np.ones(self.image.shape, np.uint8) * 255
+            points_image = draw_circles_on_image(blank, retVal, (0, 0, 0))
             fileName = left_pad(f"{i}", 6, "0")
-            self.visualizeImage(voronoi_diagram, os.path.join(self.iterationDirectoryName, f"relaxed{fileName}.png"))
+            self.visualizeImage(points_image, os.path.join(self.iterationDirectoryName, f"relaxed{fileName}.png"))
         
         # Final visualization of the relaxed points on white and original backgrounds.
         blank = np.ones(self.image.shape, np.uint8) * 255
