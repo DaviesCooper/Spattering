@@ -1,1 +1,1 @@
-from .classes import PreprocessingStippleGenerator, DebugOptions, StandardStippleGenerator
+from .classes import PreprocessingStippleGenerator, DebugOptions, StandardStippleGenerator, StippleGeneratorV2

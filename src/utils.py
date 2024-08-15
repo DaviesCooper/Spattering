@@ -143,7 +143,7 @@ def draw_arrows_on_image(image: cv2.Mat, angles: np.ndarray, magnitudes: np.ndar
 
     return retVal
 
-def draw_circles_on_image(image: cv2.Mat, points: np.ndarray, color: tuple[int, int, int], radius:int = 2):
+def draw_circles_on_image(image: cv2.Mat, points: np.ndarray, radii: np.ndarray, color: tuple[int, int, int]):
     """
     Draw points on an image with a desired radius
 
@@ -159,9 +159,32 @@ def draw_circles_on_image(image: cv2.Mat, points: np.ndarray, color: tuple[int, 
     # copy over original image
     retVal = image.copy()
     # iterate points
-    for p in points:
-        # draw the point                
-        cv2.circle(retVal, (p[1], p[0]), radius, color, -1)
+    for idx in range(len(points)):
+        blerp = points[idx]
+        # draw the point
+        cv2.circle(retVal, (points[idx][1], points[idx][0]), int(radii[idx]), color, -1)
+
+    return retVal
+
+def draw_dots_on_image(image: cv2.Mat, points: np.ndarray, radius: int, color: tuple[int, int, int]):
+    """
+    Draw points on an image with a desired radius
+
+    Args:
+    - image (np.ndarray): The original grayscale image (2D).
+    - points (np.ndarray): A 1D array of 2D points.
+    - color (tiple[int, int, int]): The color to draw the circles with
+
+    Returns:
+    - np.ndarray: The original image with circles drawn on it indicating the points.
+    """
+
+    # copy over original image
+    retVal = image.copy()
+    # iterate points
+    for idx in range(len(points)):
+        # draw the point
+        cv2.circle(retVal, (points[idx][1], points[idx][0]), radius, color, -1)
 
     return retVal
 
@@ -203,3 +226,26 @@ def draw_voronoi_on_image(image: cv2.Mat, voronoi: Voronoi, color: tuple[int, in
     cv2.polylines(retVal, lines, True, color, 1)
 
     return retVal            
+
+def remap(value, from_min, from_max, to_min, to_max):
+    """
+    Remap a value from one range to another.
+
+    :param value: The value to be remapped.
+    :param from_min: The minimum value of the current range.
+    :param from_max: The maximum value of the current range.
+    :param to_min: The minimum value of the target range.
+    :param to_max: The maximum value of the target range.
+    :return: The value remapped to the new range.
+    """
+    # Ensure the input values are within the specified range
+    if from_min == from_max:
+        raise ValueError("from_min and from_max cannot be the same value")
+    
+    # Calculate the scale factor for the input range
+    scale = (value - from_min) / (0.01 if (from_max - from_min) == 0 else (from_max - from_min))
+    
+    # Apply the scale factor to the output range
+    remapped_value = to_min + (scale * (to_max - to_min))
+    
+    return np.clip(remapped_value, to_min, to_max)

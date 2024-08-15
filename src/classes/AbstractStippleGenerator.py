@@ -4,7 +4,7 @@ import os
 import datetime
 import numpy as np
 import xml.etree.cElementTree as ET
-from src.utils import ensure_empty_directory, images_to_video
+from src.utils import ensure_empty_directory, images_to_video, draw_circles_on_image
 from src.classes import DebugOptions
 
 class AbstractStippleGenerator(ABC):
@@ -77,7 +77,7 @@ class AbstractStippleGenerator(ABC):
         """
         pass
 
-    def exportToSVG(self, outputPath: str):
+    def exportToSVG(self, vals, outputPath: str, disableRad = False):
         """
         Abstract method to export generated stipple patterns to SVG format.
 
@@ -85,30 +85,47 @@ class AbstractStippleGenerator(ABC):
             - points (np.array): The points to export to svg
             - outputPath (str): The path where the SVG file will be saved.
         """
-        radius = self.pointUnitRadius * self.dpi
         xml_declaration = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n'
-        postSort = sorted(self.result, key=lambda point: point[0]**2 + point[1]**2)
+        postSort = sorted(vals, key=lambda point: point[0][0]**2 + point[0][1]**2)
 
         root = ET.Element("svg", 
-                          width=f"{self.image.shape[1]}", 
-                          height=f"{self.image.shape[0]}", 
-                          viewbox=f"{0} {0} {self.image.shape[1]} {self.image.shape[0]}",
+                          width=f"{self.image.shape[1] / self.dpi}in", 
+                          height=f"{self.image.shape[0] / self.dpi}in", 
+                          viewbox=f"{0} {0} {self.image.shape[1] / self.dpi} {self.image.shape[0] / self.dpi}",
                           version="1.1",
                           id="svg1")
         layer = ET.SubElement(root, "g", id="layer1")
         for idx, p in enumerate(postSort):
             ET.SubElement(layer, "circle", 
-                          style='vector-effect:non-scaling-stroke;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.264583;stroke-dasharray:none;stroke-opacity:1;-inkscape-stroke:hairline',
-                          id=f"Point{idx}",
-                          cx=f"{p[1]}",
-                          cy=f"{p[0]}",
-                          r=f"{radius}"
+                          style='vector-effect:non-scaling-stroke;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;-inkscape-stroke:hairline',
+                          id=f"P{idx}",
+                          cx=f"{p[0][1] * self.dpi / 2}",
+                          cy=f"{p[0][0] * self.dpi / 2}",
+                          r=f"{0 if disableRad else p[1] * self.dpi / 2}"
                           )
         
         with open(outputPath, 'wb') as f:
             f.write(xml_declaration.encode('utf-8'))  # Write the XML declaration
             tree = ET.ElementTree(root)
             tree.write(f, encoding='utf-8', xml_declaration=False)
+        
+    def exportToPNG(self, vals, outputPath: str):
+        """
+        Abstract method to export generated stipple patterns to SVG format.
+
+        Args:
+            - points (np.array): The points to export to svg
+            - outputPath (str): The path where the SVG file will be saved.
+        """
+        # Create a blank white image with the same shape as the original image.
+        blank = np.ones(self.image.shape, np.uint8) * 255
+        
+        points = np.array(list(map(lambda x: np.array(x[0]), list(vals))))
+        for p in points:
+            blank[p[0]][p[1]] = 0
+
+        cv2.imwrite(outputPath, blank)
+
         
         
 
@@ -162,8 +179,11 @@ class AbstractStippleGenerator(ABC):
         while len(coordinates) < self.numPoints:
             x = np.random.randint(0, self.image.shape[1])
             y = np.random.randint(0, self.image.shape[0])
-            if self.image[y,x] != 255:
-                coordinates.append(np.array([y, x]))
+            if self.image[y,x] == 255:
+                continue
+            if np.random.randint(0, 235) < self.image[y,x]:
+                continue
+            coordinates.append(np.array([y, x]))
         return np.array(coordinates)
 
     def _genRandomPointsUniformly(self):
