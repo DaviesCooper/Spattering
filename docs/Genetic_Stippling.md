@@ -88,14 +88,4 @@ All images below live in the same directory as this article.
 
 *Butterfly stipple pattern, laser-cut.*
 
----
 
-## Takeaways
-
-- **[Genetic Stippling](https://github.com/DaviesCooper/Spattering)** keeps the core idea from Secord (weighted centroidal Voronoi, Lloyd relaxation) but is built for two things the paper doesn’t do: **variable stipple size** and **no-island output for laser-cut stencils**.
-- That makes it a good story for interviews: you understand the reference work, you identified concrete limitations (constant size, no fabrication model), and you designed the system around those limitations.
-- The evolutionary framing (population, generations, fitness-based selection) gives you a clear AI/optimization angle for recruiters and hiring managers—and you can point to physical output (laser-cut pieces) as the end result.
-
-**References:**
-- The Coding Train, *Weighted Voronoi Stippling*, [https://youtu.be/Bxdt6T_1qgc](https://youtu.be/Bxdt6T_1qgc)
-- Adrian Secord, “Weighted Voronoi Stippling,” *NPAR 2002*, Annecy, France.
