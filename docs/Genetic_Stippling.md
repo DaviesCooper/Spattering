@@ -51,22 +51,6 @@ So the project is tuned for that: points only on non-white pixels, optional flow
 
 ---
 
-## How it compares technically
-
-| | Secord (2002) | [Genetic Stippling](https://github.com/DaviesCooper/Spattering) |
-|---|----------------|------------|
-| **Core** | Weighted CVD, Lloyd, ρ = 1 − *f* | Same idea: intensity-weighted relaxation (+ optional flow field) |
-| **Stipple size** | One constant radius per image | One radius now; design allows per-point radius |
-| **Where points live** | Rejection sampling / dithering on image | Only on non-white pixels |
-| **Voronoi** | GPU cones (Hoff et al.), analytic centroid integrals | CPU: scipy Voronoi or KD-tree weighted sums |
-| **Output** | Raster / display; optional precomputed “stipple levels” | **SVG** circles for **laser cutting** |
-| **Fabrication** | Not in scope | **No-island** constraint for subtractive stencils |
-| **Extra** | — | Optional **flow field** (direction toward local darkest pixel) for structured images |
-
-So: same weighted Voronoi foundation, but the design is driven by **variable size** and **fabrication-safe, no-island** output for real pieces.
-
----
-
 ## Evolutionary / genetic-algorithm framing
 
 Under the hood, the relaxation loop is implemented as an **evolutionary algorithm**: a population of `numPoints` individuals (point positions), fitness defined implicitly by “did this point end up in a non-white region?”, update rule = move each point to the weighted centroid of its Voronoi cell (environment-driven, no crossover), and one selection step at the end that removes points on white. So `relaxationIterations` is literally the number of generations. If you’re used to GAs or population-based optimization, that’s the lens I use in the implementation—useful for interviews or portfolio talks when you want to highlight the AI/optimization angle.
